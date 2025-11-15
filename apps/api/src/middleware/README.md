@@ -1,5 +1,5 @@
 1. 🔐 認証（Auth）
-Cognito のトークン検証
+Cognito のトークン検証(CognitoのAPIを叩くわけではない ≠aws/)
 JWT の有効性チェック
 Authorization ヘッダーがあるか確認
 
