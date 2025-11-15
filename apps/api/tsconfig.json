@@ -1,0 +1,5 @@
+//TypeScript コンパイル設定。
+//import のパスエイリアス（@/services/userService など）
+//Node.js/Express の型設定
+//strict モードなど品質設定
+//src をビルド対象に指定

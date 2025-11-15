@@ -1,1 +1,1 @@
-DB構造をschema.prismaなどで管理。(DynamoDBの構造定義もここで行う。)
+db/を使ってDBにアクセスし、CRUDを行う。
