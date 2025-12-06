@@ -1,1 +1,23 @@
 /.vscode
+
+# 環境変数
+*.env.local
+*.env.production
+
+# Node
+node_modules/
+dist/
+.next/
+
+# Docker
+docker-compose.override.yml
+*.log
+apps/api/logs/
+
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# その他ビルド成果物
+build/
