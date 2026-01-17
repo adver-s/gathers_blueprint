@@ -1,1 +1,0 @@
-secrets managerは参照せず、CI/CD経由で環境変数として注入

@@ -1,1 +1,0 @@
-public/ : 静的ファイル（画像、favicon、PDF など）を置く。

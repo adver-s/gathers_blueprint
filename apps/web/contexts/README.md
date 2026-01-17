@@ -1,1 +1,0 @@
-contexts/ : React Context（アプリの状態管理が簡単にできるツール）を置く。
