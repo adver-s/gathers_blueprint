@@ -1,23 +1,40 @@
-#/.vscode
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# 環境変数
-#*.env.local
-#*.env.production
+# dependencies
+node_modules
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Node
-#node_modules/
-#dist/
-#.next/
+# testing
+coverage
 
-# Docker
-#docker-compose.override.yml
-#*.log
-#apps/api/logs/
+# next.js
+.next/
+out/
 
-#.DS_Store
+# production
+build
 
-# TypeScript
-#*.tsbuildinfo
+# misc
+.DS_Store
+*.pem
 
-# その他ビルド成果物
-#build/
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
