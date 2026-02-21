@@ -28,19 +28,16 @@ root/
 │     ├─ config/
 │     ├─ contexts/
 │     ├─ lib/                     # フロント固有ライブラリ
-│     ├─ middleware/
 │     ├─ public/
-│     ├─ styles/
 │     ├─ tests/                   # フロント用テスト
 │     ├─ utils/                   # フロント固有ユーティリティ
 │     ├─ types/                   # フロント固有型定義
 │     ├─ .env.local               # ローカル開発用環境変数（非機密）
-│     ├─ .env.production          # 本番用非機密変数（NEXT_PUBLIC_系）
 │     ├─ next-env.d.js
 │     ├─ next.config.js
+│     ├─ package-lock.json
 │     ├─ package.json
 │     ├─ postcss.config.js
-│     ├─ tailwind.config.js
 │     └─ tsconfig.json
 ├─ docs/
 ├─ infra/
