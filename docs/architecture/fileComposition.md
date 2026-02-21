@@ -3,23 +3,23 @@ root/
 ├─ apps/
 │  ├─ api/
 │  │  ├─ src/
-│  │  │  ├─ aws/                 # AWS連携関連
-│  │  │  ├─ config/              # 環境変数・設定取得コード
+│  │  │  ├─ aws/
+│  │  │  ├─ config/
 │  │  │  ├─ controllers/
 │  │  │  ├─ db/
-│  │  │  ├─ libs/                # バックエンド固有ライブラリ
+│  │  │  ├─ libs/
 │  │  │  ├─ middleware/
 │  │  │  ├─ models/
 │  │  │  ├─ routes/
 │  │  │  ├─ services/
-│  │  │  ├─ utils/               # バックエンド固有ユーティリティ
-│  │  │  ├─ types/               # バックエンド固有型定義
+│  │  │  ├─ utils/
+│  │  │  ├─ types/
 │  │  │  ├─ app.ts
 │  │  │  └─ server.ts
-│  │  ├─ tests/                  # バックエンド用テスト
-│  │  ├─ logs/                   # ローカル/コンテナ用ログ出力
-│  │  ├─ .env.local              # ローカル開発用環境変数（非機密）
-│  │  ├─ .env.production         # 本番用非機密変数＋Secret名など
+│  │  ├─ tests/
+│  │  ├─ logs/
+│  │  ├─ .env.local
+│  │  ├─ .env.production
 │  │  ├─ package.json
 │  │  └─ tsconfig.json
 │  └─ web/
@@ -27,15 +27,15 @@ root/
 │     ├─ components/
 │     ├─ config/
 │     ├─ contexts/
-│     ├─ lib/                     # フロント固有ライブラリ
+│     ├─ lib/
 │     ├─ middleware/
 │     ├─ public/
 │     ├─ styles/
-│     ├─ tests/                   # フロント用テスト
-│     ├─ utils/                   # フロント固有ユーティリティ
-│     ├─ types/                   # フロント固有型定義
-│     ├─ .env.local               # ローカル開発用環境変数（非機密）
-│     ├─ .env.production          # 本番用非機密変数（NEXT_PUBLIC_系）
+│     ├─ tests/
+│     ├─ utils/
+│     ├─ types/
+│     ├─ .env.local
+│     ├─ .env.production
 │     ├─ next-env.d.js
 │     ├─ next.config.js
 │     ├─ package.json
@@ -48,7 +48,7 @@ root/
 │  │  ├─ api/
 │  │  │  └─ nginx/
 │  │  │  └─ docker-compose.dev.yml
-│  │  │  └─ Dockerfile            # apps/api/Dockerfile は削除済み
+│  │  │  └─ Dockerfile
 │  │  └─ web/
 │  │     ├─ docker-compose.dev.yml
 │  │     └─ Dockerfile
@@ -71,14 +71,14 @@ root/
 │     │  └─ s3/
 │     └─ backend.tf
 ├─ packages/
-│  ├─ libs/                      # 共通処理ライブラリ
+│  ├─ libs/
 │  ├─ schema/
 │  ├─ ui/
 │  │  ├─ components/
 │  │  └─ tokens/
-│  ├─ utils/                     # 共通ユーティリティ
+│  ├─ utils/
 │  └─ package.json
-├─ .env.example                  # チーム向けサンプル
+├─ .env.example
 ├─ .eslintrc.js
 ├─ .gitignore
 ├─ .prettierrc
