@@ -38,3 +38,21 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# virtual environment
+venv/
+.venv/
+
+# python cache
+__pycache__/
+*.py[cod]
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# coverage
+.coverage
+htmlcov/
