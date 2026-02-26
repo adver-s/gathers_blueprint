@@ -1,7 +1,22 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-node_modules
+# dir/ → その階層以下のどこかにある dir を無視
+# **/dir/ → どの階層でも確実に無視
+# /dir/ → root直下だけ
+
+# ======================
+# OS
+# ======================
+.DS_Store
+
+# ======================
+# Node / Next
+# ======================
+**/node_modules/
+.next/
+out/
+build
+*.tsbuildinfo
 .pnp
 .pnp.*
 .yarn/*
@@ -10,49 +25,44 @@ node_modules
 !.yarn/releases
 !.yarn/versions
 
-# testing
-coverage
-
-# next.js
-.next/
-out/
-
-# production
-build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# ======================
+# Debug
+# ======================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# ======================
+# Environment
+# ======================
 .env*
+!.env.example
 
-# vercel
-.vercel
+# ======================
+# Python
+# ======================
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
 
-# typescript
-*.tsbuildinfo
+# ======================
+# Logs
+# ======================
+**/logs/
+*.log
 
-# virtual environment
-venv/
-.venv/
-
-# python cache
-__pycache__/
-*.py[cod]
-
-# pytest
-.pytest_cache/
-
-# mypy
-.mypy_cache/
-
-# coverage
+# ======================
+# Coverage
+# ======================
 .coverage
 htmlcov/
+coverage
+
+# ======================
+# Vercel
+# ======================
+.vercel

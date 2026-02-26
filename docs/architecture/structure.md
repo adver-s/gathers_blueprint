@@ -7,21 +7,18 @@ root/
 │  │  │  ├─ config/              # 環境変数・設定取得コード
 │  │  │  ├─ controllers/
 │  │  │  ├─ db/
-│  │  │  ├─ libs/                # バックエンド固有ライブラリ
+│  │  │  ├─ lib/                # バックエンド固有ライブラリ
 │  │  │  ├─ middleware/
 │  │  │  ├─ models/
 │  │  │  ├─ routes/
 │  │  │  ├─ services/
 │  │  │  ├─ utils/               # バックエンド固有ユーティリティ
-│  │  │  ├─ types/               # バックエンド固有型定義
-│  │  │  ├─ app.ts
-│  │  │  └─ server.ts
+│  │  │  └─ main.py
 │  │  ├─ tests/                  # バックエンド用テスト
 │  │  ├─ logs/                   # ローカル/コンテナ用ログ出力
+│  │  ├─ venv/
 │  │  ├─ .env.local              # ローカル開発用環境変数（非機密）
-│  │  ├─ .env.production         # 本番用非機密変数＋Secret名など
-│  │  ├─ package.json
-│  │  └─ tsconfig.json
+│  │  └─ .env.production         # 本番用非機密変数＋Secret名など
 │  └─ web/
 │     ├─ app/
 │     ├─ components/
@@ -33,6 +30,10 @@ root/
 │     ├─ utils/                   # フロント固有ユーティリティ
 │     ├─ types/                   # フロント固有型定義
 │     ├─ .env.local               # ローカル開発用環境変数（非機密）
+│     ├─ .eslintrc.js             # コードのエラー指摘
+│     ├─ .prettierrc              # コードの自動修正
+│     ├─ .stylelintrc
+│     ├─ eslint.config.js
 │     ├─ next-env.d.js
 │     ├─ next.config.js
 │     ├─ package-lock.json
@@ -45,7 +46,7 @@ root/
 │  │  ├─ api/
 │  │  │  └─ nginx/
 │  │  │  └─ docker-compose.dev.yml
-│  │  │  └─ Dockerfile            # apps/api/Dockerfile は削除済み
+│  │  │  └─ Dockerfile
 │  │  └─ web/
 │  │     ├─ docker-compose.dev.yml
 │  │     └─ Dockerfile
@@ -76,9 +77,6 @@ root/
 │  ├─ utils/                     # 共通ユーティリティ
 │  └─ package.json
 ├─ .env.example                  # チーム向けサンプル
-├─ .eslintrc.js
 ├─ .gitignore
-├─ .prettierrc
-├─ stylelintrc
 └─ tsconfig.base.json
 ```
