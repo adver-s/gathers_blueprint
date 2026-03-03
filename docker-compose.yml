@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: gathers_postgres
+    environment:
+      POSTGRES_USER: gathers
+      POSTGRES_PASSWORD: gathers
+      POSTGRES_DB: gathers
+    ports:
+      - "5432:5432"
+    volumes:
+      - gathers_pgdata:/var/lib/postgresql/data
+
+volumes:
+  gathers_pgdata:
