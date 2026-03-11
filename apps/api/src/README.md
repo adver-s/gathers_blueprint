@@ -2,9 +2,9 @@
    ↓ fetch / axios / React Query
 [HTTP Request]
   ↓
-routes/（URL → controller の紐付け）
-  ↓
 middleware/（認証・バリデーション）
+  ↓
+routes/（URL → controller の紐付け）
   ↓
 controllers/（リクエストの制御・service 呼び出し）
   ↓
