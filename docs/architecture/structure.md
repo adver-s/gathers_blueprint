@@ -7,6 +7,7 @@ root/
 │  │  │  ├─ config/              # 環境変数・設定取得コード
 │  │  │  ├─ controllers/
 │  │  │  ├─ db/
+│  │  │  ├─ dependencies/
 │  │  │  ├─ lib/                # バックエンド固有ライブラリ
 │  │  │  ├─ middleware/
 │  │  │  ├─ models/
