@@ -1,0 +1,1 @@
+request/responseの型定義,検証用

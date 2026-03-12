@@ -13,5 +13,3 @@ services/（ビジネスロジック）
 db/（DB のクエリ実行 ← Prisma・SQL・Dynamo）
   ↓
 DB（Aurora / DynamoDB）
-
-・schemas/実装検討
