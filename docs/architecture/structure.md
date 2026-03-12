@@ -11,7 +11,9 @@ root/
 │  │  │  ├─ lib/                # バックエンド固有ライブラリ
 │  │  │  ├─ middleware/
 │  │  │  ├─ models/
-│  │  │  ├─ routes/
+│  │  │  ├─ repositories/
+│  │  │  ├─ routers/
+│  │  │  ├─ schemas/
 │  │  │  ├─ services/
 │  │  │  ├─ utils/               # バックエンド固有ユーティリティ
 │  │  │  └─ main.py
