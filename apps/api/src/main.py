@@ -5,16 +5,10 @@ load_dotenv()
 from fastapi import FastAPI
 from sqlalchemy import text
 
-from src.config.database import init_db, engine
+from src.config.database import engine
 from src.routers import auth, me
 
 app = FastAPI()
-
-
-@app.on_event("startup")
-def startup():
-    init_db()
-
 
 @app.get("/")
 def root():
