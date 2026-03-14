@@ -20,5 +20,5 @@ class User(Base):
 
     # Relationships
     profile = relationship("Profile", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    eventsOwned = relationship("Event", back_populates="owner", cascade="all, delete-orphan")
+    events_owned = relationship("Event", back_populates="owner", cascade="all, delete-orphan")
     memberships = relationship("EventMembership", back_populates="user", cascade="all, delete-orphan")
