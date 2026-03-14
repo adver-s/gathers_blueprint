@@ -26,5 +26,5 @@ class Event(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
-    owner = relationship("User", back_populates="eventsOwned", foreign_keys=[owner_user_id])
+    owner = relationship("User", back_populates="events_owned")
     memberships = relationship("EventMembership", back_populates="event", cascade="all, delete-orphan")
