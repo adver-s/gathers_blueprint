@@ -1,17 +1,16 @@
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from src.models.user import Base
 
 
 class Profile(Base):
-    __tablename__ = "Profile"
+    __tablename__ = "profiles"
 
-    id = Column(String, primary_key=True)
-    userId = Column(String, ForeignKey("User.id", ondelete="CASCADE"), unique=True, nullable=False)
-    bio = Column(String, default="", nullable=False)
-    avatarUrl = Column(String, nullable=True)
-    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    bio = Column(String(500), default="", nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
-    user = relationship("User", back_populates="profile", foreign_keys=[userId])
+    user = relationship("User", back_populates="profile")

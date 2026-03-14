@@ -1,20 +1,19 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from src.config.database import init_db, get_db_session, SessionLocal
+
+from src.config.database import get_db, SessionLocal
+from src.routers import me
 
 app = FastAPI()
 
-# Initialize database tables on startup
-@app.on_event("startup")
-def startup():
-    init_db()
+app.include_router(me.router)
 
 @app.get("/")
 def root():
     return {"message": "Hello FastAPI"}
 
 @app.get("/health")
-def health_check(db: Session = Depends(get_db_session)):
+def health_check(db: Session = Depends(get_db)):
     """Halth check endpoint that verifies database connection."""
     try:
         db.execute("SELECT 1")

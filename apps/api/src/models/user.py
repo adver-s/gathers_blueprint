@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Index
+from sqlalchemy import Column, Integer, String, SmallInteger, Date, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -7,13 +7,16 @@ Base = declarative_base()
 
 
 class User(Base):
-    __tablename__ = "User"
+    __tablename__ = "users"
 
-    id = Column(String, primary_key=True)
-    email = Column(String, unique=True, nullable=False, index=True)
-    name = Column(String, nullable=True)
-    createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cognito_sub = Column(String(36), unique=True, nullable=False)
+    name = Column(String(50), nullable=False)
+    gender = Column(SmallInteger, nullable=False)
+    birth_date = Column(Date, nullable=False)
+    image_key = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
     profile = relationship("Profile", back_populates="user", uselist=False, cascade="all, delete-orphan")

@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from contextlib import contextmanager
+from collections.abc import Generator
 
 # Database URL configuration
 DATABASE_URL = os.getenv(
@@ -21,28 +21,9 @@ engine = create_engine(
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
-def get_db_session() -> Session:
-    """Get a new database session."""
-    return SessionLocal()
-
-
-@contextmanager
-def get_db():
-    """Context manager for database sessions."""
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
     finally:
         db.close()
-
-
-def init_db():
-    """Initialize database tables."""
-    from src.models import Base
-    
-    Base.metadata.create_all(bind=engine)
