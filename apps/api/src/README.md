@@ -10,6 +10,6 @@ controllers/（リクエストの制御・service 呼び出し）
   ↓
 services/（ビジネスロジック）
   ↓
-db/（DB のクエリ実行 ← Prisma・SQL・Dynamo）
+db/（DB のクエリ実行 ← SQLAlchemy・SQL・Dynamo）
   ↓
 DB（Aurora / DynamoDB）
