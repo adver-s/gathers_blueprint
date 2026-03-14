@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import IntEnum
-from sqlalchemy import Column, Integer, SmallInteger, DateTime, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Column, Integer, SmallInteger, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from src.models.user import Base
 
