@@ -11,7 +11,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     cognito_sub = Column(String(36), unique=True, nullable=False)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False, index=True)
     gender = Column(SmallInteger, nullable=False)
     birth_date = Column(Date, nullable=False)
     image_key = Column(String(255), nullable=True)
