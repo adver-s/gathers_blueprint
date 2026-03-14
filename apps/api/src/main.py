@@ -1,23 +1,36 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-from src.config.database import init_db, get_db_session, SessionLocal
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from fastapi import FastAPI
+from sqlalchemy import text
+
+from src.config.database import init_db, engine
+from src.routers import auth, me
 
 app = FastAPI()
 
-# Initialize database tables on startup
+
 @app.on_event("startup")
 def startup():
     init_db()
+
 
 @app.get("/")
 def root():
     return {"message": "Hello FastAPI"}
 
+
 @app.get("/health")
-def health_check(db: Session = Depends(get_db_session)):
-    """Halth check endpoint that verifies database connection."""
+def health_check():
+    """Health check endpoint that verifies database connection."""
     try:
-        db.execute("SELECT 1")
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
         return {"status": "unhealthy", "database": f"error: {str(e)}"}
+
+
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(me.router, prefix="/me", tags=["me"])
