@@ -15,7 +15,7 @@ def root():
 
 @app.get("/health")
 def health_check(db: Session = Depends(get_db_session)):
-    """Health check endpoint that verifies database connection."""
+    """Halth check endpoint that verifies database connection."""
     try:
         db.execute("SELECT 1")
         return {"status": "healthy", "database": "connected"}
