@@ -6,9 +6,9 @@ from src.models.user import Base
 
 
 class MembershipStatus(IntEnum):
-    JOINED = 1
-    LEFT = 2
-    KICKED = 3
+    JOINED = 0
+    LEFT = 1
+    KICKED = 2
 
 
 class EventMembership(Base):

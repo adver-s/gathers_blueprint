@@ -1,12 +1,14 @@
 from dotenv import load_dotenv
 
+from apps.api.src.routers import profile
+
 load_dotenv()
 
 from fastapi import FastAPI
 from sqlalchemy import text
 
 from src.config.database import engine
-from src.routers import auth, me
+from src.routers import auth
 
 app = FastAPI()
 
@@ -27,4 +29,4 @@ def health_check():
 
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(me.router, prefix="/me", tags=["me"])
+app.include_router(profile.router, prefix="/me", tags=["me"])

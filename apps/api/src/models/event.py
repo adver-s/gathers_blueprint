@@ -6,9 +6,9 @@ from src.models.user import Base
 
 
 class EventStatus(IntEnum):
-    OPEN = 1
-    CLOSED = 2
-    CANCELLED = 3
+    OPEN = 0
+    CLOSED = 1
+    CANCELLED = 2
 
 
 class Event(Base):

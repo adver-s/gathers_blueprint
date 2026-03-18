@@ -1,9 +1,15 @@
 from datetime import datetime
+from enum import IntEnum
 from sqlalchemy import Column, Integer, String, SmallInteger, Date, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
+class Gender(IntEnum):
+    MALE = 0
+    FEMALE = 1
+    OTHER = 2
 
 
 class User(Base):
