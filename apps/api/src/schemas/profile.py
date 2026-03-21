@@ -11,3 +11,9 @@ class MyProfileResponse(BaseModel):
     birth_date: date
     bio: str | None
     image_key: str | None
+
+class SetupProfileRequest(BaseModel):
+    name: str
+    gender: int
+    birth_date: date
+    bio: str | None = None
