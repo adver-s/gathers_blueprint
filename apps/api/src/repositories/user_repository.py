@@ -11,6 +11,14 @@ def get_user_with_profile(db: Session, user_id: int) -> User | None:
         .first() # 最初の一件を取得(なければNone)
     )
 
+def get_user_id_by_cognito_sub(db: Session, cognito_sub: str) -> int | None:
+    result = (
+        db.query(User.id)
+        .filter(User.cognito_sub == cognito_sub)
+        .first()
+    )
+    return result[0] if result else None
+
 def get_user_by_cognito_sub(db: Session, cognito_sub: str) -> User | None:
     return (
         db.query(User)

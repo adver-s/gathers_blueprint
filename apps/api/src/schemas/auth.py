@@ -25,3 +25,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     sub: str | None = None
+
+class CurrentUser(BaseModel):
+    sub: str

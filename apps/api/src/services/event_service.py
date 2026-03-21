@@ -38,10 +38,10 @@ def _participant_out(user: User) -> ParticipantOut:
     )
 
 
-def create_event(db: Session, owner: User, body: EventCreate) -> EventDetailOut:
+def create_event(db: Session, owner_id: int, body: EventCreate) -> EventDetailOut:
     event = er.create_event(
         db,
-        owner_user_id=owner.id,
+        owner_user_id=owner_id,
         title=body.title,
         description=body.description,
         place=body.place,
@@ -110,17 +110,20 @@ def event_to_detail(db: Session, event: Event) -> EventDetailOut:
     )
 
 
-def update_event(db: Session, event_id: int, actor: User, body: EventUpdate) -> EventDetailOut:
+def update_event(db: Session, event_id: int, actor_id: int, body: EventUpdate) -> EventDetailOut:
     event = er.get_event_by_id(db, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    if event.owner_user_id != actor.id:
+
+    if event.owner_user_id != actor_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not the event owner")
+
     if event.status != EventStatus.OPEN:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Event is not open for updates",
         )
+
     if body.title is not None:
         event.title = body.title
     if body.description is not None:
@@ -139,123 +142,150 @@ def update_event(db: Session, event_id: int, actor: User, body: EventUpdate) -> 
         event.capacity = body.capacity
     if body.image_key is not None:
         event.image_key = body.image_key
+
     er.save_event(db, event)
+
     full = er.get_event_with_relations(db, event_id)
     assert full is not None
     return event_to_detail(db, full)
 
 
-def join_event(db: Session, event_id: int, user: User) -> EventDetailOut:
+def join_event(db: Session, event_id: int, user_id: int) -> EventDetailOut:
     event = er.get_event_by_id(db, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+
     if event.status != EventStatus.OPEN:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Recruitment is not open",
         )
-    if user.id == event.owner_user_id:
+
+    if user_id == event.owner_user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Owner does not join via this endpoint",
         )
+
     joined = er.count_joined_for_event(db, event_id)
-    membership = er.get_membership(db, event_id, user.id)
+    membership = er.get_membership(db, event_id, user_id)
+
     if membership is None:
         if joined >= event.capacity:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Event is full")
-        er.insert_membership_joined(db, event_id, user.id)
+        er.insert_membership_joined(db, event_id, user_id)
+
     elif membership.status == MembershipStatus.JOINED:
         pass
+
     elif membership.status == MembershipStatus.LEFT:
         if joined >= event.capacity:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Event is full")
         er.save_membership_rejoin(db, membership)
+
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot rejoin after being removed",
         )
+
     full = er.get_event_with_relations(db, event_id)
     assert full is not None
     return event_to_detail(db, full)
 
 
-def leave_event(db: Session, event_id: int, user: User) -> EventDetailOut:
+def leave_event(db: Session, event_id: int, user_id: int) -> EventDetailOut:
     event = er.get_event_by_id(db, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    if user.id == event.owner_user_id:
+
+    if user_id == event.owner_user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Owner has no membership row to leave",
         )
-    membership = er.get_membership(db, event_id, user.id)
+
+    membership = er.get_membership(db, event_id, user_id)
     if membership is None or membership.status != MembershipStatus.JOINED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Not an active participant",
         )
+
     er.save_membership_leave(db, membership)
+
     full = er.get_event_with_relations(db, event_id)
     assert full is not None
     return event_to_detail(db, full)
 
 
-def kick_member(db: Session, event_id: int, owner: User, target_user_id: int) -> EventDetailOut:
+def kick_member(db: Session, event_id: int, owner_id: int, target_user_id: int) -> EventDetailOut:
     event = er.get_event_by_id(db, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    if event.owner_user_id != owner.id:
+
+    if event.owner_user_id != owner_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not the event owner")
+
     if target_user_id == event.owner_user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot remove the owner",
         )
+
     membership = er.get_membership(db, event_id, target_user_id)
     if membership is None or membership.status != MembershipStatus.JOINED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User is not an active participant",
         )
+
     er.save_membership_kick(db, membership)
+
     full = er.get_event_with_relations(db, event_id)
     assert full is not None
     return event_to_detail(db, full)
 
 
-def close_event(db: Session, event_id: int, owner: User) -> EventDetailOut:
+def close_event(db: Session, event_id: int, owner_id: int) -> EventDetailOut:
     event = er.get_event_by_id(db, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    if event.owner_user_id != owner.id:
+
+    if event.owner_user_id != owner_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not the event owner")
+
     if event.status != EventStatus.OPEN:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Event is not open",
         )
+
     event.status = EventStatus.CLOSED
     er.save_event(db, event)
+
     full = er.get_event_with_relations(db, event_id)
     assert full is not None
     return event_to_detail(db, full)
 
 
-def cancel_event(db: Session, event_id: int, owner: User) -> EventDetailOut:
+def cancel_event(db: Session, event_id: int, owner_id: int) -> EventDetailOut:
     event = er.get_event_by_id(db, event_id)
     if event is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    if event.owner_user_id != owner.id:
+
+    if event.owner_user_id != owner_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not the event owner")
+
     if event.status == EventStatus.CANCELLED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Event is already cancelled",
         )
+
     event.status = EventStatus.CANCELLED
     er.save_event(db, event)
+
     full = er.get_event_with_relations(db, event_id)
     assert full is not None
     return event_to_detail(db, full)

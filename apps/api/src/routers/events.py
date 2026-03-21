@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from src.config.database import get_db
-from src.dependencies.db_user import require_db_user
+from src.dependencies.db_user import require_db_user_id
 from src.models.user import User
 from src.schemas.event import EventCreate, EventDetailOut, EventListOut, EventUpdate, KickBody
 from src.services import event_service as es
@@ -14,9 +14,9 @@ router = APIRouter()
 def create_event(
     body: EventCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_db_user),
+    user_id: int = Depends(require_db_user_id),
 ):
-    return es.create_event(db, user, body)
+    return es.create_event(db, user_id, body)
 
 
 @router.get("/", response_model=list[EventListOut])
@@ -39,27 +39,27 @@ def patch_event(
     event_id: int,
     body: EventUpdate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_db_user),
+    user_id: int = Depends(require_db_user_id),
 ):
-    return es.update_event(db, event_id, user, body)
+    return es.update_event(db, event_id, user_id, body)
 
 
 @router.post("/{event_id}/join", response_model=EventDetailOut)
 def join_event(
     event_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_db_user),
+    user_id: int = Depends(require_db_user_id),
 ):
-    return es.join_event(db, event_id, user)
+    return es.join_event(db, event_id, user_id)
 
 
 @router.post("/{event_id}/leave", response_model=EventDetailOut)
 def leave_event(
     event_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_db_user),
+    user_id: int = Depends(require_db_user_id),
 ):
-    return es.leave_event(db, event_id, user)
+    return es.leave_event(db, event_id, user_id)
 
 
 @router.post("/{event_id}/kick", response_model=EventDetailOut)
@@ -67,24 +67,24 @@ def kick_member(
     event_id: int,
     body: KickBody,
     db: Session = Depends(get_db),
-    owner: User = Depends(require_db_user),
+    owner_id: int = Depends(require_db_user_id),
 ):
-    return es.kick_member(db, event_id, owner, body.user_id)
+    return es.kick_member(db, event_id, owner_id, body.user_id)
 
 
 @router.post("/{event_id}/close", response_model=EventDetailOut)
 def close_event(
     event_id: int,
     db: Session = Depends(get_db),
-    owner: User = Depends(require_db_user),
+    owner_id: int = Depends(require_db_user_id),
 ):
-    return es.close_event(db, event_id, owner)
+    return es.close_event(db, event_id, owner_id)
 
 
 @router.post("/{event_id}/cancel", response_model=EventDetailOut)
 def cancel_event(
     event_id: int,
     db: Session = Depends(get_db),
-    owner: User = Depends(require_db_user),
+    owner_id: int = Depends(require_db_user_id),
 ):
-    return es.cancel_event(db, event_id, owner)
+    return es.cancel_event(db, event_id, owner_id)

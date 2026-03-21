@@ -19,19 +19,20 @@ def get_current_user_sub():
 router = APIRouter(prefix="/profile") # APIエンドポイントのグループ化 URLの先頭に/profileをつける
 
 
-@router.get("/me", response_model=MyProfileResponse) # GET /profile/me というAPIを作る
+@router.get("", response_model=MyProfileResponse) # GET /profile というAPIを作る
 # read_my_profile→APIが呼ばれたときに実行される関数
 def read_my_profile(
-    user_id: int,  # ここは後で認証dependency
+    user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db)
 ):
     return get_my_profile(db, user_id)
 
-@router.post("/init")
-def init_user(
+@router.post("/setup")
+def setup_profile(
+    body: SetupProfileRequest,
+    user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
-    cognito_sub: str = Depends(get_current_user_sub),
 ):
-    user = create_user_if_not_exists(db, cognito_sub)
+    update_initial_profile(db, user_id, body)
 
-    return {"user_id": user.id}
+    return {"message": "ok"}
