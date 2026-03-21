@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MembershipStatus {
+  JOINED
+  LEFT
+  KICKED
+}
+
+enum EventStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile     Profile?
+  eventsOwned Event[] @relation("EventOwner")
+  memberships EventMembership[]
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  bio       String   @default("")
+  avatarUrl String?
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String?
+  place     String
+  startsAt  DateTime
+  capacity  Int
+  status    EventStatus @default(OPEN)
+
+  ownerUserId String
+  owner       User      @relation("EventOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships EventMembership[]
+}
+
+model EventMembership {
+  id       String           @id @default(cuid())
+  eventId  String
+  userId   String
+  status   MembershipStatus @default(JOINED)
+  joinedAt DateTime         @default(now())
+  leftAt   DateTime?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@index([eventId])
+}

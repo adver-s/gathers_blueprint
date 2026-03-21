@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import IntEnum
-from sqlalchemy import Column, String, DateTime, Integer, SmallInteger, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, SmallInteger, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from src.models.user import Base
 
@@ -16,6 +16,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False, default="")
     image_key = Column(String(255), nullable=True)
     place = Column(String(255), nullable=False)
     starts_at = Column(DateTime, nullable=False)

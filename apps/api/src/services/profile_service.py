@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
-from schemas.profile import MyProfileResponse, SetupProfileRequest
-from repositories.user_repository import (
-    get_user_with_profile,
-    get_user_by_cognito_sub,
+from src.repositories.user_repository import (
     create_user_with_profile,
+    get_user_by_cognito_sub,
+    get_user_with_profile,
 )
-from models.user import User
+from src.models.user import User
+from src.schemas.profile import MyProfileResponse, SetupProfileRequest
 
 
 def get_my_profile(db: Session, user_id: int) -> MyProfileResponse | None:

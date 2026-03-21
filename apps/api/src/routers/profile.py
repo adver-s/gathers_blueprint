@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from config.database import get_db
-from services.profile_service import (
-    get_my_profile,
+from src.config.database import get_db
+from src.schemas.profile import MyProfileResponse, SetupProfileRequest
+from src.services.profile_service import (
     create_user_if_not_exists,
+    get_my_profile,
     update_initial_profile,
 )
-from schemas.profile import MyProfileResponse, SetupProfileRequest
 
 # 後で補完
 def get_current_user_id():
@@ -26,15 +26,6 @@ def read_my_profile(
     db: Session = Depends(get_db)
 ):
     return get_my_profile(db, user_id)
-
-@router.post("/init")
-def init_user(
-    db: Session = Depends(get_db),
-    cognito_sub: str = Depends(get_current_user_sub),
-):
-    user = create_user_if_not_exists(db, cognito_sub)
-
-    return {"user_id": user.id}
 
 @router.post("/init")
 def init_user(

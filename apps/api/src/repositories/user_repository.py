@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
-from models.user import User
-from models.profile import Profile
+
+from src.models.profile import Profile
+from src.models.user import User
 
 def get_user_with_profile(db: Session, user_id: int) -> User | None:
     return (

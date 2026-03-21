@@ -16,3 +16,5 @@ sqlalchemy==2.0.25
 psycopg2-binary==2.9.9
 alembic==1.13.1
 python-dotenv
+PyJWT[crypto]>=2.8.0
+pydantic-settings>=2.0.0
