@@ -26,12 +26,21 @@ def get_user_by_cognito_sub(db: Session, cognito_sub: str) -> User | None:
         .first()
     )
 
-def create_user_with_profile(db: Session, cognito_sub: str) -> User:
+def create_user_with_profile(
+    db: Session,
+    cognito_sub: str,
+    *,
+    initial_name: str = "",
+) -> User:
+    name = (initial_name or "").strip() or "ユーザー"
+    if len(name) > 50:
+        name = name[:50]
     user = User(
         cognito_sub=cognito_sub,
-        name="",
+        name=name,
         gender=0,
         birth_date="2000-01-01",
+        profile_detail_completed=False,
     )
     db.add(user)
     db.flush()

@@ -24,6 +24,7 @@ def get_my_profile(db: Session, user_id: int) -> MyProfileResponse | None:
         birth_date=user.birth_date,
         bio=user.profile.bio if user.profile else None,
         image_key=user.image_key,
+        profile_detail_completed=bool(user.profile_detail_completed),
     )
 
 def create_user_if_not_exists(db: Session, cognito_sub: str) -> User:
@@ -50,6 +51,8 @@ def update_initial_profile(
 
     if user.profile:
         user.profile.bio = body.bio
+
+    user.profile_detail_completed = True
 
     db.commit()
     db.refresh(user)

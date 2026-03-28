@@ -28,3 +28,14 @@ class TokenData(BaseModel):
 
 class CurrentUser(BaseModel):
     sub: str
+
+
+class AuthSyncBody(BaseModel):
+    """POST /auth/sync。表示名は未送信なら ID トークンの name / email から補う。"""
+
+    display_name: str | None = None
+
+
+class AuthSyncOut(BaseModel):
+    user_id: int
+    needs_profile_detail: bool

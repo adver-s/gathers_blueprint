@@ -48,6 +48,12 @@ def create_event(db: Session, owner_id: int, body: EventCreate) -> EventDetailOu
         starts_at=body.starts_at,
         capacity=body.capacity,
         image_key=body.image_key,
+        mood=body.mood,
+        schedule_items=body.scheduleItems,
+        rule_text=body.ruleText,
+        restrictions=body.restrictions,
+        location_note=body.locationNote,
+        reservation_note=body.reservationNote,
     )
     full = er.get_event_with_relations(db, event.id)
     assert full is not None
@@ -107,6 +113,12 @@ def event_to_detail(db: Session, event: Event) -> EventDetailOut:
         image_key=event.image_key,
         owner=_owner_brief(event.owner),
         participants=participants,
+        mood=event.mood,
+        scheduleItems=event.schedule_items,
+        ruleText=event.rule_text,
+        restrictions=event.restrictions,
+        locationNote=event.location_note,
+        reservationNote=event.reservation_note,
     )
 
 
@@ -142,6 +154,18 @@ def update_event(db: Session, event_id: int, actor_id: int, body: EventUpdate) -
         event.capacity = body.capacity
     if body.image_key is not None:
         event.image_key = body.image_key
+    if body.mood is not None:
+        event.mood = body.mood
+    if body.scheduleItems is not None:
+        event.schedule_items = body.scheduleItems
+    if body.ruleText is not None:
+        event.rule_text = body.ruleText
+    if body.restrictions is not None:
+        event.restrictions = body.restrictions
+    if body.locationNote is not None:
+        event.location_note = body.locationNote
+    if body.reservationNote is not None:
+        event.reservation_note = body.reservationNote
 
     er.save_event(db, event)
 

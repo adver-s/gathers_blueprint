@@ -18,6 +18,12 @@ def create_event(
     starts_at,
     capacity: int,
     image_key: str | None,
+    mood=None,
+    schedule_items=None,
+    rule_text: str | None = None,
+    restrictions=None,
+    location_note: str | None = None,
+    reservation_note: str | None = None,
 ) -> Event:
     event = Event(
         title=title,
@@ -28,6 +34,12 @@ def create_event(
         image_key=image_key,
         status=EventStatus.OPEN,
         owner_user_id=owner_user_id,
+        mood=mood,
+        schedule_items=schedule_items,
+        rule_text=rule_text,
+        restrictions=restrictions,
+        location_note=location_note,
+        reservation_note=reservation_note,
     )
     db.add(event)
     db.commit()

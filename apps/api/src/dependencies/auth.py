@@ -5,9 +5,27 @@ from sqlalchemy.orm import Session
 from src.config.database import get_db
 from src.repositories.user_repository import get_user_id_by_cognito_sub
 from src.lib.cognito import CognitoTokenUse, verify_cognito_token
-from schemas.auth import CurrentUser
+from src.schemas.auth import CurrentUser
 
 oauth2_scheme = HTTPBearer(auto_error=True)
+
+
+def get_id_token_claims(
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+) -> dict:
+    """POST /auth/sync 専用。Cognito ID トークンを検証し claims を返す。"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        return verify_cognito_token(
+            credentials.credentials,
+            token_use=CognitoTokenUse.ID,
+        )
+    except ValueError:
+        raise credentials_exception from None
 
 
 def get_current_user(
@@ -20,9 +38,10 @@ def get_current_user(
     )
 
     try:
+        # Amplify の fetchAuthSession は accessToken を返す。ID トークンと揃えると 401 になる。
         claims = verify_cognito_token(
             credentials.credentials,
-            token_use=CognitoTokenUse.ID,
+            token_use=CognitoTokenUse.ACCESS,
         )
     except ValueError:
         raise credentials_exception

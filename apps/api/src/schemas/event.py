@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
 
@@ -18,6 +20,14 @@ class EventCreate(BaseModel):
     capacity: int = Field(..., ge=1)
     image_key: str | None = Field(default=None, max_length=255)
 
+    # Extended fields
+    mood: EventMood | None = None
+    scheduleItems: list[EventScheduleItem] | None = None
+    ruleText: str | None = Field(default=None, max_length=2000)
+    restrictions: EventRestrictions | None = None
+    locationNote: str | None = Field(default=None, max_length=2000)
+    reservationNote: str | None = Field(default=None, max_length=2000)
+
 
 class EventUpdate(BaseModel):
     title: str | None = Field(default=None, max_length=100)
@@ -26,6 +36,14 @@ class EventUpdate(BaseModel):
     starts_at: datetime | None = None
     capacity: int | None = Field(default=None, ge=1)
     image_key: str | None = Field(default=None, max_length=255)
+
+    # Extended fields
+    mood: EventMood | None = None
+    scheduleItems: list[EventScheduleItem] | None = None
+    ruleText: str | None = Field(default=None, max_length=2000)
+    restrictions: EventRestrictions | None = None
+    locationNote: str | None = Field(default=None, max_length=2000)
+    reservationNote: str | None = Field(default=None, max_length=2000)
 
 
 class EventOwnerBrief(BaseModel):
@@ -65,6 +83,36 @@ class EventDetailOut(BaseModel):
     image_key: str | None
     owner: EventOwnerBrief
     participants: list[ParticipantOut]
+
+    # Extended fields
+    mood: EventMood | None = None
+    scheduleItems: list[EventScheduleItem] | None = None
+    ruleText: str | None = Field(default=None, max_length=2000)
+    restrictions: EventRestrictions | None = None
+    locationNote: str | None = Field(default=None, max_length=2000)
+    reservationNote: str | None = Field(default=None, max_length=2000)
+
+
+class EventMood(BaseModel):
+    firstMeet: int
+    casual: int
+    active: int
+    calm: int
+    indoor: int
+    outdoor: int
+
+
+class EventScheduleItem(BaseModel):
+    id: str
+    title: str
+    minutes: int | None = None
+
+
+class EventRestrictions(BaseModel):
+    ageRange: str | None = None
+    scale: str | None = None
+    capacityText: str | None = None
+    level: str | None = None
 
 
 class KickBody(BaseModel):

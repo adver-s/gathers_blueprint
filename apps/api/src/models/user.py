@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import IntEnum
-from sqlalchemy import Column, Integer, String, SmallInteger, Date, DateTime
+from sqlalchemy import Column, Integer, String, SmallInteger, Date, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
