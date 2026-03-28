@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.models.profile import Profile
 from src.models.user import User
+from datetime import date
 
 def get_user_with_profile(db: Session, user_id: int) -> User | None:
     return (
@@ -28,30 +29,27 @@ def get_user_by_cognito_sub(db: Session, cognito_sub: str) -> User | None:
 
 def create_user_with_profile(
     db: Session,
-    cognito_sub: str,
     *,
-    initial_name: str = "",
+    cognito_sub: str,
+    name: str,
+    gender: int,
+    birth_date: date,
+    bio: str | None,
 ) -> User:
-    name = (initial_name or "").strip() or "ユーザー"
-    if len(name) > 50:
-        name = name[:50]
     user = User(
         cognito_sub=cognito_sub,
         name=name,
-        gender=0,
-        birth_date="2000-01-01",
-        profile_detail_completed=False,
+        gender=gender,
+        birth_date=birth_date,
     )
     db.add(user)
-    db.flush()
 
     profile = Profile(
-        user_id=user.id,
-        bio="",
+        user=user,
+        bio=bio,
     )
     db.add(profile)
 
     db.commit()
     db.refresh(user)
-
     return user

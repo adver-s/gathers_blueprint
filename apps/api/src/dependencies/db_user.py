@@ -7,7 +7,14 @@ from src.models.user import User
 from src.repositories.user_repository import get_user_by_cognito_sub, get_user_id_by_cognito_sub
 from src.schemas.auth import CurrentUser
 
+# ↓ユーザーが存在しない場合も許容
+def get_optional_db_user(
+    db: Session = Depends(get_db),
+    claims: CurrentUser = Depends(get_current_user),
+) -> User | None:
+    return get_user_by_cognito_sub(db, claims.sub)
 
+# ↓ユーザーが必ず存在する前提のAPI用（存在しなければ404エラー）
 def require_db_user(
     db: Session = Depends(get_db),
     claims: CurrentUser = Depends(get_current_user),
