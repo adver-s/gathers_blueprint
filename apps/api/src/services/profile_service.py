@@ -1,11 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
-from src.repositories.user_repository import (
-    create_user_with_profile,
-    get_user_by_cognito_sub,
-    get_user_with_profile,
-)
+from src.repositories.user_repository import get_user_with_profile
 from src.models.user import User
 from src.schemas.profile import MyProfileResponse, SetupProfileRequest
 
@@ -25,14 +21,6 @@ def get_my_profile(db: Session, user_id: int) -> MyProfileResponse | None:
         bio=user.profile.bio if user.profile else None,
         image_key=user.image_key,
     )
-
-def create_user_if_not_exists(db: Session, cognito_sub: str) -> User:
-    user = get_user_by_cognito_sub(db, cognito_sub)
-
-    if user:
-        return user
-
-    return create_user_with_profile(db, cognito_sub)
 
 def update_initial_profile(
     db: Session,
@@ -55,3 +43,7 @@ def update_initial_profile(
     db.refresh(user)
 
     return user
+
+def is_profile_completed(user: User) -> bool:
+    # TODO: 実装予定
+    return True
