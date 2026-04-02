@@ -6,5 +6,5 @@ import { redirect } from "next/navigation";
  * アプリ内の画面へ戻す。
  */
 export default function AuthConfigRedirectPage() {
-  redirect("/meet");
+  redirect("/events");
 }

@@ -73,6 +73,22 @@ export type EventListItem = {
   participants_preview?: ParticipantOut[] | null;
 };
 
+/** POST /events body（FastAPI `EventCreate` と同じ camelCase） */
+export type EventCreatePayload = {
+  title: string;
+  description: string;
+  place: string;
+  starts_at: string;
+  capacity: number;
+  image_key?: string | null;
+  mood?: EventMood | null;
+  scheduleItems?: EventScheduleItem[] | null;
+  ruleText?: string | null;
+  restrictions?: EventRestrictions | null;
+  locationNote?: string | null;
+  reservationNote?: string | null;
+};
+
 export type EventUpdatePayload = {
   title?: string | null;
   description?: string | null;

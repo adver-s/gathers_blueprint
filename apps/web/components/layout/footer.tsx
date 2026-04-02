@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Playfair_Display } from 'next/font/google';
 
 export function Footer() {
   const pathname = usePathname();
@@ -20,7 +19,7 @@ export function Footer() {
   };
 
   const tabs = [
-    { name: 'meet', path: '/meet' },
+    { name: 'meet', path: '/events' },
     { name: 'schedule', path: '/schedule' },
     { name: 'profile', path: '/profile' },
     { name: 'setting', path: '/setting' },
@@ -29,7 +28,10 @@ export function Footer() {
   return (
     <footer className="w-full bg-white border-t-2 border-black h-20 flex items-center">
       {tabs.map((tab) => {
-        const isActive = pathname === tab.path;
+        const isActive =
+          tab.path === '/events'
+            ? pathname === '/events' || pathname.startsWith('/events/')
+            : pathname === tab.path;
         return (
           <button
             key={tab.name}

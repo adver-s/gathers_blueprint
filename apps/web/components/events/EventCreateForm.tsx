@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { HostProfile } from "@/types/event";
+import type { EventCreatePayload, EventMood } from "@/types/eventsApi";
+import { createEvent } from "@/lib/api/events";
 
 // ここは今ある uploader を使ってOK（なければ後で置き換え）
 import EventImageUploader from "@/components/events/EventImageUploader";
@@ -13,7 +16,54 @@ type Props = {
 type FlowItem = { title: string; minutes: number; free?: boolean };
 type HostTask = { title: string; note?: string; url?: string };
 
+function ensureScheduleId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return `s-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * フォームのスライダー名と API の EventMood（6軸）が一致しないため、
+ * repeat/social → firstMeet/casual、intensity/vibe → active/calm、gender と mode から indoor/outdoor を補間している。
+ */
+function formSlidersToMood(
+  mode: "FIRST" | "REPEAT",
+  sliders: { intensity: number; repeat: number; social: number; vibe: number; gender: number },
+): EventMood {
+  return {
+    firstMeet:
+      mode === "REPEAT" ? Math.min(100, 25 + sliders.repeat) : Math.min(100, 20 + sliders.repeat / 2),
+    casual: sliders.social,
+    active: sliders.intensity,
+    calm: sliders.vibe,
+    indoor: Math.min(100, Math.round(35 + (100 - sliders.gender) * 0.45)),
+    outdoor: Math.min(100, Math.round(35 + sliders.gender * 0.45)),
+  };
+}
+
+function buildDescription(tasks: HostTask[], endAt: string): string {
+  const tasksBlock =
+    tasks.length > 0
+      ? tasks
+          .map((t) => {
+            const parts = [t.title];
+            if (t.note) parts.push(t.note);
+            if (t.url) parts.push(t.url);
+            return `・${parts.join(" / ")}`;
+          })
+          .join("\n")
+      : "";
+
+  const endBlock =
+    endAt.trim().length > 0
+      ? `終了予定: ${new Date(endAt).toLocaleString("ja-JP", { dateStyle: "medium", timeStyle: "short" })}`
+      : "";
+
+  return [tasksBlock, endBlock].filter(Boolean).join("\n\n");
+}
+
 export function EventCreateForm({ hostProfile }: Props) {
+  const router = useRouter();
+
   // ===== 上（1枚目） =====
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [groupName, setGroupName] = useState("即席バドミントンA🏸");
@@ -55,35 +105,49 @@ export function EventCreateForm({ hostProfile }: Props) {
   const canSubmit = useMemo(() => {
     return (
       !!hostProfile &&
-      !!coverUrl &&
       groupName.trim().length > 0 &&
       place.trim().length > 0 &&
       startAt.trim().length > 0 &&
       endAt.trim().length > 0 &&
       !isSubmitting
     );
-  }, [hostProfile, coverUrl, groupName, place, startAt, endAt, isSubmitting]);
+  }, [hostProfile, groupName, place, startAt, endAt, isSubmitting]);
 
-  async function submitMock() {
+  async function handleSubmit() {
     if (!canSubmit) return;
     setIsSubmitting(true);
     try {
-      // いまはAPIなしモック：consoleでpayload確認して「作成できた気」になれるようにする
-      const payload = {
-        coverUrl,
-        groupName,
-        place,
-        startAt,
-        endAt,
-        host: hostProfile,
-        constraints: { ageRange, scale, capacity },
-        atmosphere: { mode, sliders },
-        flow,
-        rules,
-        tasks,
+      const description = buildDescription(tasks, endAt);
+      const payload: EventCreatePayload = {
+        title: groupName.trim(),
+        description,
+        place: place.trim(),
+        starts_at: new Date(startAt).toISOString(),
+        capacity,
+        image_key: null,
+        mood: formSlidersToMood(mode, sliders),
+        scheduleItems: flow.map((item) => ({
+          id: ensureScheduleId(),
+          title: item.title,
+          minutes: item.free ? null : item.minutes,
+        })),
+        ruleText: rules.trim() || null,
+        restrictions: {
+          ageRange: ageRange.trim() || null,
+          scale: scale.trim() || null,
+          capacityText: `${capacity}名`,
+          level: null,
+        },
+        locationNote: null,
+        reservationNote: mode === "FIRST" ? "初参加向け" : "リピート向け",
       };
-      console.log("CREATE PAYLOAD", payload);
-      alert("モック作成完了！（consoleにpayload出してる）");
+
+      await createEvent(payload);
+      router.replace("/events");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "作成に失敗しました";
+      if (message.includes("Not authenticated")) router.push("/login");
+      else alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -324,15 +388,14 @@ export function EventCreateForm({ hostProfile }: Props) {
               {groupName.trim() || "（グループ名）"}
             </div>
             <div className="truncate text-xs text-neutral-500">
-              {!coverUrl ? "画像 / " : ""}
               {!place.trim() ? "場所 / " : ""}
-              {(!startAt || !endAt) ? "時間" : ""}
+              {!startAt || !endAt ? "時間 / " : ""}
               {canSubmit ? "OK" : "を入力してね"}
             </div>
           </div>
 
           <button
-            onClick={submitMock}
+            onClick={handleSubmit}
             disabled={!canSubmit}
             className={[
               "rounded-2xl px-5 py-3 text-sm font-semibold transition",

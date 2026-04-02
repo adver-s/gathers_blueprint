@@ -12,7 +12,7 @@ export function Header() {
 
   let pageTitle = '';
   if (pathname === '/profile') pageTitle = 'You';
-  else if (pathname === '/meet') pageTitle = 'Gathers';
+  else if (pathname === '/events' || pathname.startsWith('/events/')) pageTitle = 'Gathers';
   else if (pathname === '/schedule') pageTitle = 'Ready for';
   else if (pathname === '/setting') pageTitle = 'Set';
   else if (pathname === '/group') pageTitle = 'That\'s';

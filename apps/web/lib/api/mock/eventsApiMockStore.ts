@@ -1,4 +1,9 @@
-import type { EventDetail, EventListItem, EventUpdatePayload } from "@/types/eventsApi";
+import type {
+  EventCreatePayload,
+  EventDetail,
+  EventListItem,
+  EventUpdatePayload,
+} from "@/types/eventsApi";
 import {
   MOCK_MY_USER_ID,
   detailToListItem,
@@ -43,6 +48,45 @@ export async function mockFetchEvents(opts?: {
   }
   rows.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   return rows.slice(offset, offset + limit).map(detailToListItem);
+}
+
+function nextEventId(map: Map<number, EventDetail>): number {
+  const keys = [...map.keys()];
+  return keys.length === 0 ? 1 : Math.max(...keys) + 1;
+}
+
+export async function mockCreateEvent(payload: EventCreatePayload): Promise<EventDetail> {
+  await mockDelay(200);
+  const map = ensureStore();
+  const id = nextEventId(map);
+  const me = getMockMyProfile();
+
+  const detail: EventDetail = {
+    id,
+    title: payload.title,
+    description: payload.description,
+    place: payload.place,
+    starts_at: payload.starts_at,
+    capacity: payload.capacity,
+    joined_count: 1,
+    status: "OPEN",
+    image_key: payload.image_key ?? null,
+    owner: {
+      user_id: me.id,
+      name: me.name,
+      image_key: me.image_key,
+    },
+    participants: [meParticipant()],
+    mood: payload.mood ?? undefined,
+    scheduleItems: payload.scheduleItems ?? undefined,
+    ruleText: payload.ruleText ?? undefined,
+    restrictions: payload.restrictions ?? undefined,
+    locationNote: payload.locationNote ?? undefined,
+    reservationNote: payload.reservationNote ?? undefined,
+  };
+
+  map.set(id, deepClone(detail));
+  return deepClone(detail);
 }
 
 export async function mockFetchEventById(eventId: number): Promise<EventDetail> {

@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  EventCreatePayload,
   EventDetail,
   EventListItem,
   EventUpdatePayload,
@@ -9,6 +10,7 @@ import { getApiBaseUrl } from "@/lib/api/baseUrl";
 import { getAccessToken } from "@/lib/auth/getAccessToken";
 import { isMockEventsApi } from "@/lib/api/mock/isMockEventsApi";
 import {
+  mockCreateEvent,
   mockFetchEventById,
   mockFetchEvents,
   mockJoinEvent,
@@ -38,6 +40,15 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   return (await res.json()) as T;
+}
+
+export async function createEvent(payload: EventCreatePayload): Promise<EventDetail> {
+  if (isMockEventsApi()) return mockCreateEvent(payload);
+
+  return apiFetch<EventDetail>("/events", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function fetchEvents(opts?: {
