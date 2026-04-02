@@ -12,6 +12,7 @@ class MyProfileResponse(BaseModel):
     birth_date: date
     bio: str | None
     image_key: str | None
+    profile_detail_completed: bool
 
 class SetupProfileRequest(BaseModel):
     name: str
@@ -21,7 +22,7 @@ class SetupProfileRequest(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: Optional[str] = None
-    gender: Optional[str] = None
+    gender: Optional[int] = None
     birth_date: Optional[date] = None
     bio: Optional[str] = None
     image_key: Optional[str] = None

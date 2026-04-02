@@ -41,6 +41,7 @@ def create_user_with_profile(
         name=name,
         gender=gender,
         birth_date=birth_date,
+        profile_detail_completed=False,
     )
     db.add(user)
 

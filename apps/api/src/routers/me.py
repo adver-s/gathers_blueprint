@@ -53,6 +53,7 @@ def setup_me(
         name="",
         gender=0,
         birth_date=date(2000, 1, 1),
+        bio=None,
     )
 
     return {

@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy.orm import Session
 
 from src.repositories.user_repository import (
@@ -30,7 +32,14 @@ def sync_user_from_cognito(
 
     user = get_user_by_cognito_sub(db, sub)
     if user is None:
-        user = create_user_with_profile(db, sub, initial_name=resolved)
+        user = create_user_with_profile(
+            db,
+            cognito_sub=sub,
+            name=resolved,
+            gender=0,
+            birth_date=date(2000, 1, 1),
+            bio=None,
+        )
     else:
         if display_name and display_name.strip():
             user.name = display_name.strip()[:50]

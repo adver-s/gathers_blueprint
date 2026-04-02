@@ -3,8 +3,16 @@ from sqlalchemy.orm import Session
 
 from src.config.database import get_db
 from src.dependencies.auth import get_current_user_id
-from src.schemas.profile import MyProfileResponse, UpdateProfileRequest
-from src.services.profile_service import get_my_profile, update_profile
+from src.schemas.profile import (
+    MyProfileResponse,
+    SetupProfileRequest,
+    UpdateProfileRequest,
+)
+from src.services.profile_service import (
+    get_my_profile,
+    setup_profile,
+    update_profile,
+)
 
 router = APIRouter(prefix="/profile")
 
@@ -16,7 +24,18 @@ def read_my_profile(
 ):
     return get_my_profile(db, user_id)
 
-@router.patch("/", response_model=dict)
+
+@router.post("/setup", response_model=dict)
+def post_profile_setup(
+    body: SetupProfileRequest,
+    user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    setup_profile(db, user_id, body)
+    return {"message": "ok"}
+
+
+@router.patch("", response_model=dict)
 def patch_profile(
     body: UpdateProfileRequest,
     user_id: int = Depends(get_current_user_id),

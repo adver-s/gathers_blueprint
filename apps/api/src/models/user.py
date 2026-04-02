@@ -21,6 +21,7 @@ class User(Base):
     gender = Column(SmallInteger, nullable=False)
     birth_date = Column(Date, nullable=False)
     image_key = Column(String(255), nullable=True)
+    profile_detail_completed = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

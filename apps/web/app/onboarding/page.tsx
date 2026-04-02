@@ -4,13 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { fetchMyProfile, setupMyProfile } from "@/lib/api/me";
 import { isMockEventsApi } from "@/lib/api/mock/isMockEventsApi";
-
-/** API User.Gender: MALE=0, FEMALE=1, OTHER=2 */
-const GENDERS = [
-  { value: 0, label: "男性" },
-  { value: 1, label: "女性" },
-  { value: 2, label: "その他" },
-] as const;
+import { GENDERS } from "@/lib/constants/gender";
 
 export default function OnboardingPage() {
   const router = useRouter();
