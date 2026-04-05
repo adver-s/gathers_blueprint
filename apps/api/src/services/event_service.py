@@ -73,6 +73,38 @@ def list_events(
     return [event_to_list_out(e, counts.get(e.id, 0)) for e in events]
 
 
+def list_my_events(
+    db: Session,
+    *,
+    user_id: int,
+    include_closed: bool,
+    limit: int,
+    offset: int,
+) -> list[EventListOut]:
+    events = er.list_events_for_user(
+        db,
+        user_id=user_id,
+        include_closed=include_closed,
+        limit=limit,
+        offset=offset,
+    )
+    ids = [e.id for e in events]
+    counts = er.count_joined_batch(db, ids)
+    preview_users = er.joined_participants_preview_batch(db, ids)
+    out: list[EventListOut] = []
+    for e in events:
+        users = preview_users.get(e.id, [])
+        preview = [_participant_out(u) for u in users] if users else None
+        out.append(
+            event_to_list_out(
+                e,
+                counts.get(e.id, 0),
+                participants_preview=preview,
+            )
+        )
+    return out
+
+
 def get_event_detail(db: Session, event_id: int) -> EventDetailOut:
     event = er.get_event_with_relations(db, event_id)
     if event is None:
@@ -80,7 +112,12 @@ def get_event_detail(db: Session, event_id: int) -> EventDetailOut:
     return event_to_detail(db, event)
 
 
-def event_to_list_out(event: Event, joined_count: int) -> EventListOut:
+def event_to_list_out(
+    event: Event,
+    joined_count: int,
+    *,
+    participants_preview: list[ParticipantOut] | None = None,
+) -> EventListOut:
     return EventListOut(
         id=event.id,
         title=event.title,
@@ -91,6 +128,7 @@ def event_to_list_out(event: Event, joined_count: int) -> EventListOut:
         status=_status_str(event.status),
         image_key=event.image_key,
         owner=_owner_brief(event.owner),
+        participants_preview=participants_preview,
     )
 
 

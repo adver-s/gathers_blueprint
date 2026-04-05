@@ -50,6 +50,30 @@ export async function mockFetchEvents(opts?: {
   return rows.slice(offset, offset + limit).map(detailToListItem);
 }
 
+export async function mockFetchMyScheduleEvents(opts?: {
+  includeClosed?: boolean;
+  limit?: number;
+  offset?: number;
+}): Promise<EventListItem[]> {
+  await mockDelay(150);
+  const includeClosed = opts?.includeClosed ?? false;
+  const limit = opts?.limit ?? 20;
+  const offset = opts?.offset ?? 0;
+
+  const map = ensureStore();
+  let rows = [...map.values()];
+  if (!includeClosed) {
+    rows = rows.filter((d) => d.status === "OPEN");
+  }
+  rows = rows.filter(
+    (d) =>
+      d.owner.user_id === MOCK_MY_USER_ID ||
+      d.participants.some((p) => p.user_id === MOCK_MY_USER_ID),
+  );
+  rows.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  return rows.slice(offset, offset + limit).map(detailToListItem);
+}
+
 function nextEventId(map: Map<number, EventDetail>): number {
   const keys = [...map.keys()];
   return keys.length === 0 ? 1 : Math.max(...keys) + 1;

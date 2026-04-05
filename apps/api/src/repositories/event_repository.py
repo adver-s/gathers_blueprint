@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import func
+from sqlalchemy import and_, exists, func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from src.models.event import Event, EventStatus
@@ -66,6 +66,62 @@ def list_events(
         .limit(limit)
         .all()
     )
+
+
+def list_events_for_user(
+    db: Session,
+    *,
+    user_id: int,
+    include_closed: bool,
+    limit: int,
+    offset: int,
+) -> list[Event]:
+    statuses = [EventStatus.OPEN]
+    if include_closed:
+        statuses.append(EventStatus.CLOSED)
+    member_exists = exists().where(
+        and_(
+            EventMembership.event_id == Event.id,
+            EventMembership.user_id == user_id,
+            EventMembership.status == MembershipStatus.JOINED,
+        )
+    )
+    return (
+        db.query(Event)
+        .options(joinedload(Event.owner).joinedload(User.profile))
+        .filter(Event.status.in_(statuses))
+        .filter(or_(Event.owner_user_id == user_id, member_exists))
+        .order_by(Event.starts_at.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
+def joined_participants_preview_batch(
+    db: Session,
+    event_ids: list[int],
+    *,
+    limit_per_event: int = 4,
+) -> dict[int, list[User]]:
+    if not event_ids:
+        return {}
+    rows = (
+        db.query(EventMembership)
+        .options(joinedload(EventMembership.user).joinedload(User.profile))
+        .filter(
+            EventMembership.event_id.in_(event_ids),
+            EventMembership.status == MembershipStatus.JOINED,
+        )
+        .order_by(EventMembership.event_id.asc(), EventMembership.joined_at.asc())
+        .all()
+    )
+    out: dict[int, list[User]] = {eid: [] for eid in event_ids}
+    for m in rows:
+        lst = out[m.event_id]
+        if len(lst) < limit_per_event:
+            lst.append(m.user)
+    return out
 
 
 def get_event_by_id(db: Session, event_id: int) -> Event | None:

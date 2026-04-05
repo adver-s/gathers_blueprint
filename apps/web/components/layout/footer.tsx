@@ -31,7 +31,9 @@ export function Footer() {
         const isActive =
           tab.path === '/events'
             ? pathname === '/events' || pathname.startsWith('/events/')
-            : pathname === tab.path;
+            : tab.path === '/setting'
+              ? pathname === '/setting' || pathname.startsWith('/setting/')
+              : pathname === tab.path;
         return (
           <button
             key={tab.name}

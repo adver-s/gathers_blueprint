@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from datetime import date
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
 from src.models.user import User
 from src.config.database import get_db
 from src.dependencies.auth import get_current_user
-from src.dependencies.db_user import get_optional_db_user
+from src.dependencies.db_user import get_optional_db_user, require_db_user_id
 from src.repositories.user_repository import create_user_with_profile
-from src.services.profile_service import is_profile_completed
-from src.schemas.me import MeResponse
 from src.schemas.auth import CurrentUser
+from src.schemas.event import EventListOut
+from src.schemas.me import MeResponse
+from src.services import event_service as event_svc
+from src.services.profile_service import is_profile_completed
 
 router = APIRouter()
 
@@ -32,6 +35,25 @@ def get_me(
         "is_profile_completed": is_profile_completed(db_user),
         "user_id": db_user.id,
     }
+
+
+@router.get("/events", response_model=list[EventListOut])
+def list_my_events(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(require_db_user_id),
+    include_closed: bool = Query(False),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    """Events the user organizes (owner) or has joined (active membership), by starts_at ascending."""
+    return event_svc.list_my_events(
+        db,
+        user_id=user_id,
+        include_closed=include_closed,
+        limit=limit,
+        offset=offset,
+    )
+
 
 @router.post("/setup", response_model=MeResponse)
 def setup_me(

@@ -69,6 +69,7 @@ class EventListOut(BaseModel):
     status: EventStatusStr
     image_key: str | None
     owner: EventOwnerBrief
+    participants_preview: list[ParticipantOut] | None = None
 
 
 class EventDetailOut(BaseModel):

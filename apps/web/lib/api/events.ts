@@ -13,6 +13,7 @@ import {
   mockCreateEvent,
   mockFetchEventById,
   mockFetchEvents,
+  mockFetchMyScheduleEvents,
   mockJoinEvent,
   mockLeaveEvent,
   mockUpdateEvent,
@@ -69,6 +70,26 @@ export async function fetchEvents(opts?: {
   });
 
   return apiFetch<EventListItem[]>(`/events?${qs.toString()}`);
+}
+
+export async function fetchMyScheduleEvents(opts?: {
+  includeClosed?: boolean;
+  limit?: number;
+  offset?: number;
+}): Promise<EventListItem[]> {
+  if (isMockEventsApi()) return mockFetchMyScheduleEvents(opts);
+
+  const includeClosed = opts?.includeClosed ?? false;
+  const limit = opts?.limit ?? 20;
+  const offset = opts?.offset ?? 0;
+
+  const qs = new URLSearchParams({
+    include_closed: String(includeClosed),
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  return apiFetch<EventListItem[]>(`/me/events?${qs.toString()}`);
 }
 
 export async function fetchEventById(eventId: number): Promise<EventDetail> {
