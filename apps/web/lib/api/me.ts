@@ -37,26 +37,7 @@ export async function fetchMyProfile(): Promise<MyProfile> {
     return getMockMyProfile();
   }
 
-  /*const token = await getAccessToken();
-  if (!token) throw new Error("Not authenticated (missing Cognito access token).");
-
-  const res = await fetch(`${getApiBaseUrl()}/me/profile`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });*/
-
-  const res = await fetchWithAuth(`${getApiBaseUrl()}/me/profile`);
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Request failed: ${res.status}`);
-  }
-
-  return (await res.json()) as MyProfile;
+  return fetchWithAuth<MyProfile>("/me/profile");
 }
 
 export async function setupMyProfile(body: SetupProfileBody): Promise<void> {
