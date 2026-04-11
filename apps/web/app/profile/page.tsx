@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TestProfileView } from "@/components/profile/TestProfileView";
 import {
   fetchMyProfile,
@@ -9,7 +9,12 @@ import {
   type MyProfile,
 } from "@/lib/api/me";
 import { isMockEventsApi } from "@/lib/api/mock/isMockEventsApi";
+import { syncAuthUser } from "@/lib/api/authSync";
 import { GENDERS } from "@/lib/constants/gender";
+import {
+  friendlyProfileErrorMessage,
+  getProfileApiErrorRecovery,
+} from "@/lib/profile/profileApiErrors";
 
 function syncFormFromProfile(p: MyProfile, setters: {
   setName: (v: string) => void;
@@ -34,6 +39,12 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorRecovery, setErrorRecovery] = useState<
+    "none" | "goLogin" | "resync"
+  >("none");
+  const [resyncBusy, setResyncBusy] = useState(false);
+  /** 案 A: 初回マウントで User not found のとき 1 回だけ POST /auth/sync して再フェッチ */
+  const didAutoResyncOnMountRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,12 +53,40 @@ export default function ProfilePage() {
         const me = await fetchMyProfile();
         if (cancelled) return;
         setProfile(me);
+        setErrorRecovery("none");
         syncFormFromProfile(me, { setName, setGender, setBirthDate, setBio });
       } catch (e) {
         if (cancelled) return;
-        const msg = e instanceof Error ? e.message : "読み込みに失敗しました";
-        setError(msg);
-        if (msg.includes("Not authenticated")) router.replace("/login");
+        let msg = e instanceof Error ? e.message : "読み込みに失敗しました";
+        let recovery = getProfileApiErrorRecovery(msg);
+
+        if (
+          recovery === "resync" &&
+          !isMockEventsApi() &&
+          !didAutoResyncOnMountRef.current
+        ) {
+          didAutoResyncOnMountRef.current = true;
+          try {
+            await syncAuthUser();
+            const me = await fetchMyProfile();
+            if (cancelled) return;
+            setProfile(me);
+            setErrorRecovery("none");
+            setError(null);
+            syncFormFromProfile(me, { setName, setGender, setBirthDate, setBio });
+          } catch (e2) {
+            if (cancelled) return;
+            msg = e2 instanceof Error ? e2.message : "読み込みに失敗しました";
+            recovery = getProfileApiErrorRecovery(msg);
+            setErrorRecovery(recovery);
+            setError(friendlyProfileErrorMessage(msg, recovery));
+            if (recovery === "goLogin") router.replace("/login");
+          }
+        } else {
+          setErrorRecovery(recovery);
+          setError(friendlyProfileErrorMessage(msg, recovery));
+          if (recovery === "goLogin") router.replace("/login");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -61,6 +100,7 @@ export default function ProfilePage() {
     if (!profile) return;
     syncFormFromProfile(profile, { setName, setGender, setBirthDate, setBio });
     setError(null);
+    setErrorRecovery("none");
     setIsEditing(true);
   };
 
@@ -68,13 +108,36 @@ export default function ProfilePage() {
     if (!profile) return;
     syncFormFromProfile(profile, { setName, setGender, setBirthDate, setBio });
     setError(null);
+    setErrorRecovery("none");
     setIsEditing(false);
+  };
+
+  const onResyncAccount = async () => {
+    if (isMockEventsApi()) return;
+    setResyncBusy(true);
+    setError(null);
+    try {
+      await syncAuthUser();
+      const me = await fetchMyProfile();
+      setProfile(me);
+      setErrorRecovery("none");
+      syncFormFromProfile(me, { setName, setGender, setBirthDate, setBio });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "同期に失敗しました";
+      const recovery = getProfileApiErrorRecovery(msg);
+      setErrorRecovery(recovery);
+      setError(friendlyProfileErrorMessage(msg, recovery));
+      if (recovery === "goLogin") router.replace("/login");
+    } finally {
+      setResyncBusy(false);
+    }
   };
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
     setError(null);
+    setErrorRecovery("none");
     setSaving(true);
     try {
       const payload = {
@@ -96,7 +159,11 @@ export default function ProfilePage() {
       }
       setIsEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "保存に失敗しました");
+      const msg = err instanceof Error ? err.message : "保存に失敗しました";
+      const recovery = getProfileApiErrorRecovery(msg);
+      setErrorRecovery(recovery);
+      setError(friendlyProfileErrorMessage(msg, recovery));
+      if (recovery === "goLogin") router.replace("/login");
     } finally {
       setSaving(false);
     }
@@ -114,7 +181,19 @@ export default function ProfilePage() {
     return (
       <main className="mx-auto w-full max-w-[420px] px-4 pt-6 pb-28">
         {error ? (
-          <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          <div className="space-y-3">
+            <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            {errorRecovery === "resync" && !isMockEventsApi() ? (
+              <button
+                type="button"
+                disabled={resyncBusy}
+                onClick={() => void onResyncAccount()}
+                className="w-full rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {resyncBusy ? "同期中..." : "サーバーと同期する"}
+              </button>
+            ) : null}
+          </div>
         ) : (
           <p className="text-sm text-neutral-600">プロフィールを読み込めませんでした。</p>
         )}
@@ -186,7 +265,21 @@ export default function ProfilePage() {
             />
           </label>
 
-          {error ? <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+          {error ? (
+            <div className="space-y-3">
+              <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>
+              {errorRecovery === "resync" && !isMockEventsApi() ? (
+                <button
+                  type="button"
+                  disabled={resyncBusy || saving}
+                  onClick={() => void onResyncAccount()}
+                  className="w-full rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:opacity-50"
+                >
+                  {resyncBusy ? "同期中..." : "サーバーと同期してから再試行"}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button

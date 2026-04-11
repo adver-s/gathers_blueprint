@@ -42,9 +42,27 @@ for a, b in _pairs:
     if a in _cors_origins and b not in _cors_origins:
         _cors_origins.append(b)
 
+# Next の「Network」URL（例: http://192.168.x.x:3000）は allow_origins に無いと
+# ブラウザが CORS でレスポンスを破棄し fetch が "Failed to fetch" になる。
+# 本番では CORS_ALLOW_LAN_DEV=false か CORS_ORIGIN_REGEX を明示してください。
+_cors_origin_regex: str | None = None
+_env_regex = os.getenv("CORS_ORIGIN_REGEX", "").strip()
+if _env_regex:
+    _cors_origin_regex = _env_regex
+elif os.getenv("CORS_ALLOW_LAN_DEV", "true").lower() in ("1", "true", "yes"):
+    _cors_origin_regex = (
+        r"^https?://("
+        r"192\.168\.\d{1,3}\.\d{1,3}|"
+        r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
+        r"172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}|"
+        r"100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}"
+        r")(:\d{1,5})?$"
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
+    allow_origin_regex=_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

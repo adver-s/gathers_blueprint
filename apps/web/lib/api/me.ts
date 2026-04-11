@@ -37,7 +37,7 @@ export async function fetchMyProfile(): Promise<MyProfile> {
     return getMockMyProfile();
   }
 
-  return fetchWithAuth<MyProfile>("/me/profile");
+  return fetchWithAuth<MyProfile>("/me/profile", {}, "access");
 }
 
 export async function setupMyProfile(body: SetupProfileBody): Promise<void> {

@@ -38,10 +38,10 @@ def get_current_user(
     )
 
     try:
-        # Amplify の fetchAuthSession は accessToken を返す。ID トークンと揃えると 401 になる。
+        # フロントの getAccessToken() と一致させる（/auth/sync のみ ID トークン）。
         claims = verify_cognito_token(
             credentials.credentials,
-            token_use=CognitoTokenUse.ID,
+            token_use=CognitoTokenUse.ACCESS,
         )
     except ValueError:
         raise credentials_exception

@@ -4,10 +4,16 @@ Alembic environment configuration.
 
 import os
 from logging.config import fileConfig
+from pathlib import Path
+
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 from dotenv import load_dotenv
-load_dotenv(".env.local")
+
+# apps/api を cwd に依存せず読む（.env に DATABASE_URL、任意で .env.local が上書き）
+_api_root = Path(__file__).resolve().parents[1]
+load_dotenv(_api_root / ".env")
+load_dotenv(_api_root / ".env.local", override=True)
 
 # This is the Alembic Config object.
 config = context.config

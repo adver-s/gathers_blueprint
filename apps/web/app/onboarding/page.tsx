@@ -2,9 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { syncAuthUser } from "@/lib/api/authSync";
 import { fetchMyProfile, setupMyProfile } from "@/lib/api/me";
 import { isMockEventsApi } from "@/lib/api/mock/isMockEventsApi";
 import { GENDERS } from "@/lib/constants/gender";
+import {
+  friendlyProfileErrorMessage,
+  getProfileApiErrorRecovery,
+} from "@/lib/profile/profileApiErrors";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -15,6 +20,11 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bootFailed, setBootFailed] = useState(false);
+  const [errorRecovery, setErrorRecovery] = useState<
+    "none" | "goLogin" | "resync"
+  >("none");
+  const [resyncBusy, setResyncBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,14 +36,19 @@ export default function OnboardingPage() {
           router.replace("/events");
           return;
         }
+        setBootFailed(false);
+        setErrorRecovery("none");
         setName(me.name);
         setGender(me.gender);
         if (me.birth_date) setBirthDate(me.birth_date.slice(0, 10));
       } catch (e) {
         if (cancelled) return;
+        setBootFailed(true);
         const msg = e instanceof Error ? e.message : "読み込みに失敗しました";
-        setError(msg);
-        if (msg.includes("Not authenticated")) router.replace("/login");
+        const recovery = getProfileApiErrorRecovery(msg);
+        setErrorRecovery(recovery);
+        setError(friendlyProfileErrorMessage(msg, recovery));
+        if (recovery === "goLogin") router.replace("/login");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -43,9 +58,37 @@ export default function OnboardingPage() {
     };
   }, [router]);
 
+  const onResyncAccount = async () => {
+    if (isMockEventsApi()) return;
+    setResyncBusy(true);
+    setError(null);
+    try {
+      await syncAuthUser();
+      const me = await fetchMyProfile();
+      if (me.profile_detail_completed) {
+        router.replace("/events");
+        return;
+      }
+      setBootFailed(false);
+      setErrorRecovery("none");
+      setName(me.name);
+      setGender(me.gender);
+      if (me.birth_date) setBirthDate(me.birth_date.slice(0, 10));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "同期に失敗しました";
+      const recovery = getProfileApiErrorRecovery(msg);
+      setErrorRecovery(recovery);
+      setError(friendlyProfileErrorMessage(msg, recovery));
+      if (recovery === "goLogin") router.replace("/login");
+    } finally {
+      setResyncBusy(false);
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorRecovery("none");
     setSaving(true);
     try {
       await setupMyProfile({
@@ -56,7 +99,11 @@ export default function OnboardingPage() {
       });
       router.replace("/events");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "保存に失敗しました");
+      const msg = err instanceof Error ? err.message : "保存に失敗しました";
+      const recovery = getProfileApiErrorRecovery(msg);
+      setErrorRecovery(recovery);
+      setError(friendlyProfileErrorMessage(msg, recovery));
+      if (recovery === "goLogin") router.replace("/login");
     } finally {
       setSaving(false);
     }
@@ -66,6 +113,29 @@ export default function OnboardingPage() {
     return (
       <main className="mx-auto w-full max-w-[420px] px-4 pt-6 pb-28">
         <p className="text-sm text-neutral-600">読み込み中...</p>
+      </main>
+    );
+  }
+
+  if (bootFailed) {
+    return (
+      <main className="mx-auto w-full max-w-[420px] px-4 pt-6 pb-28">
+        <h1 className="mb-2 text-2xl font-bold">プロフィールを読み込めませんでした</h1>
+        {error ? (
+          <div className="space-y-3">
+            <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            {errorRecovery === "resync" && !isMockEventsApi() ? (
+              <button
+                type="button"
+                disabled={resyncBusy}
+                onClick={() => void onResyncAccount()}
+                className="w-full rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {resyncBusy ? "同期中..." : "サーバーと同期する"}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </main>
     );
   }
@@ -126,7 +196,21 @@ export default function OnboardingPage() {
           />
         </label>
 
-        {error ? <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+        {error ? (
+          <div className="space-y-3">
+            <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            {errorRecovery === "resync" && !isMockEventsApi() ? (
+              <button
+                type="button"
+                disabled={resyncBusy || saving}
+                onClick={() => void onResyncAccount()}
+                className="w-full rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 disabled:opacity-50"
+              >
+                {resyncBusy ? "同期中..." : "サーバーと同期してから再試行"}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
         <button
           type="submit"
