@@ -7,12 +7,12 @@ type TokenType = "id" | "access";
 export async function fetchWithAuth<T>(
   path: string,
   options: RequestInit = {},
-  tokenType: TokenType = "id"
+  tokenType: TokenType = "access"
 ): Promise<T> {
   const token =
-    tokenType === "id"
-      ? await getIdToken()
-      : await getAccessToken();
+    tokenType === "access"
+      ? await getAccessToken()
+      : await getIdToken();
 
   if (!token) throw new Error("Not authenticated");
 

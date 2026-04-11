@@ -6,8 +6,6 @@ import type {
   EventListItem,
   EventUpdatePayload,
 } from "@/types/eventsApi";
-import { getApiBaseUrl } from "@/lib/api/baseUrl";
-import { getAccessToken } from "@/lib/auth/getAccessToken";
 import { isMockEventsApi } from "@/lib/api/mock/isMockEventsApi";
 import {
   mockCreateEvent,
