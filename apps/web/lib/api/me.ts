@@ -4,6 +4,7 @@ import { getApiBaseUrl } from "@/lib/api/baseUrl";
 import { getMockMyProfile } from "@/lib/api/mock/eventsApiSeed";
 import { isMockEventsApi } from "@/lib/api/mock/isMockEventsApi";
 import { getAccessToken } from "@/lib/auth/getAccessToken";
+import { fetchWithAuth } from "./client";
 
 export type MyProfile = {
   id: number;
@@ -36,7 +37,7 @@ export async function fetchMyProfile(): Promise<MyProfile> {
     return getMockMyProfile();
   }
 
-  const token = await getAccessToken();
+  /*const token = await getAccessToken();
   if (!token) throw new Error("Not authenticated (missing Cognito access token).");
 
   const res = await fetch(`${getApiBaseUrl()}/me/profile`, {
@@ -46,7 +47,9 @@ export async function fetchMyProfile(): Promise<MyProfile> {
       Authorization: `Bearer ${token}`,
     },
     cache: "no-store",
-  });
+  });*/
+
+  const res = await fetchWithAuth(`${getApiBaseUrl()}/me/profile`);
 
   if (!res.ok) {
     const text = await res.text();
