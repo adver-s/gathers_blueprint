@@ -46,7 +46,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 export async function createEvent(payload: EventCreatePayload): Promise<EventDetail> {
   if (isMockEventsApi()) return mockCreateEvent(payload);
 
-  return apiFetch<EventDetail>("/events", {
+  return apiFetch<EventDetail>("/events/", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -69,7 +69,7 @@ export async function fetchEvents(opts?: {
     offset: String(offset),
   });
 
-  return apiFetch<EventListItem[]>(`/events?${qs.toString()}`);
+  return apiFetch<EventListItem[]>(`/events/?${qs.toString()}`);
 }
 
 export async function fetchMyScheduleEvents(opts?: {
@@ -89,7 +89,7 @@ export async function fetchMyScheduleEvents(opts?: {
     offset: String(offset),
   });
 
-  return apiFetch<EventListItem[]>(`/me/events?${qs.toString()}`);
+  return apiFetch<EventListItem[]>(`/me/events/?${qs.toString()}`);
 }
 
 export async function fetchEventById(eventId: number): Promise<EventDetail> {
