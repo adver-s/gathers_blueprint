@@ -41,7 +41,7 @@ def get_current_user(
         # Amplify の fetchAuthSession は accessToken を返す。ID トークンと揃えると 401 になる。
         claims = verify_cognito_token(
             credentials.credentials,
-            token_use=CognitoTokenUse.ACCESS,
+            token_use=CognitoTokenUse.ID,
         )
     except ValueError:
         raise credentials_exception

@@ -6,7 +6,14 @@ from dotenv import load_dotenv
 # リポジトリルートではなく apps/api/.env を常に読む（起動 cwd に依存しない）
 # override=True: シェルに残った古い COGNITO_* より .env を優先する
 _API_ROOT = Path(__file__).resolve().parent.parent
+_ENV_FILE = _API_ROOT / ".env"
+
+print("ENV FILE PATH:", _ENV_FILE)
+print("EXISTS:", _ENV_FILE.exists())
+
 load_dotenv(_API_ROOT / ".env", override=True)
+
+print("DATABASE_URL after load_dotenv:", os.getenv("DATABASE_URL"))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -61,5 +68,5 @@ def health_check():
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(me.router, prefix="/me", tags=["me"])
-app.include_router(profile.router, prefix="/me", tags=["me"])
+app.include_router(profile.router, prefix="/me/profile", tags=["me"])
 app.include_router(events.router, prefix="/events", tags=["events"])
