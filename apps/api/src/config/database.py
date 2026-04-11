@@ -3,10 +3,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from collections.abc import Generator
 
+print("DATABASE_URL =", os.getenv("DATABASE_URL"))
+
 # Database URL configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://user:password@localhost:5432/gathers"
+    "DATABASE_URL"
 )
 
 # SQLAlchemy engine

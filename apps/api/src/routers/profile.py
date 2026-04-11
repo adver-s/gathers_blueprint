@@ -14,7 +14,7 @@ from src.services.profile_service import (
     update_profile,
 )
 
-router = APIRouter(prefix="/profile")
+router = APIRouter()
 
 
 @router.get("", response_model=MyProfileResponse)
