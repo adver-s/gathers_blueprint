@@ -8,12 +8,7 @@ from dotenv import load_dotenv
 _API_ROOT = Path(__file__).resolve().parent.parent
 _ENV_FILE = _API_ROOT / ".env"
 
-print("ENV FILE PATH:", _ENV_FILE)
-print("EXISTS:", _ENV_FILE.exists())
-
 load_dotenv(_API_ROOT / ".env", override=True)
-
-print("DATABASE_URL after load_dotenv:", os.getenv("DATABASE_URL"))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,9 +55,6 @@ elif os.getenv("CORS_ALLOW_LAN_DEV", "true").lower() in ("1", "true", "yes"):
         r"100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}"
         r")(:\d{1,5})?$"
     )
-
-print(_cors_origins)
-print(_cors_origin_regex)
 
 app.add_middleware(
     CORSMiddleware,
