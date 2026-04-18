@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { confirmSignUp, signIn, signUp } from "aws-amplify/auth";
+import { confirmSignUp, signUp } from "aws-amplify/auth";
 import { ensureAmplifyConfigured } from "@/lib/auth/amplify";
-import { postAuthSyncAndNavigate } from "@/lib/auth/postAuthSync";
+import { signInThenPostAuthSync } from "@/lib/auth/signInThenPostAuthSync";
 
 type Phase = "form" | "confirm";
 
@@ -20,8 +20,11 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
 
   const finishWithSession = async () => {
-    await signIn({ username: email, password });
-    await postAuthSyncAndNavigate(router, { displayName: displayName.trim() });
+    await signInThenPostAuthSync(
+      router,
+      { username: email, password },
+      { displayName: displayName.trim() },
+    );
   };
 
   const onSubmitForm = async (e: React.FormEvent) => {
@@ -57,7 +60,20 @@ export default function RegisterPage() {
       await confirmSignUp({ username: email, confirmationCode: code.trim() });
       await finishWithSession();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "確認に失敗しました");
+      const msg = err instanceof Error ? err.message : "";
+      const lower = msg.toLowerCase();
+      const alreadyConfirmed =
+        lower.includes("confirmed") || lower.includes("user cannot be confirmed");
+      if (alreadyConfirmed) {
+        try {
+          await finishWithSession();
+          return;
+        } catch (e2) {
+          setError(e2 instanceof Error ? e2.message : "確認に失敗しました");
+        }
+      } else {
+        setError(msg || "確認に失敗しました");
+      }
     } finally {
       setLoading(false);
     }

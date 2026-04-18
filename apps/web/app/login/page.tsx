@@ -2,9 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "aws-amplify/auth";
 import { ensureAmplifyConfigured } from "@/lib/auth/amplify";
-import { postAuthSyncAndNavigate } from "@/lib/auth/postAuthSync";
+import { signInThenPostAuthSync } from "@/lib/auth/signInThenPostAuthSync";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -23,8 +22,7 @@ export default function LoginPage() {
       await ensureAmplifyConfigured();
 
       // Cognito のユーザー名（サインインID）として email を使う前提。
-      await signIn({ username: email, password });
-      await postAuthSyncAndNavigate(router);
+      await signInThenPostAuthSync(router, { username: email, password });
     } catch (err) {
       const message = err instanceof Error ? err.message : "ログインに失敗しました";
       setError(message);

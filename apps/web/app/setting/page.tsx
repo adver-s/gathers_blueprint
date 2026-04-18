@@ -21,7 +21,8 @@ export default function SettingPage() {
     setLoggingOut(true);
     try {
       await ensureAmplifyConfigured();
-      await signOut();
+      // ローカルだけでなく Cognito のリフレッシュも無効化し、残セッションで signIn が衝突するのを防ぐ
+      await signOut({ global: true });
       router.replace("/login");
     } catch (err) {
       const message =

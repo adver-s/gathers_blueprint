@@ -10,13 +10,15 @@ export function Footer() {
     return (
       <footer className="w-full border-t-2 border-black h-24 flex items-center justify-center">
         <button
+          type="button"
           className="w-3/4 h-12 bg-black text-white rounded-lg text-base font-semibold"
+          onClick={() => router.push('/group_create')}
         >
           Create Group
         </button>
       </footer>
     );
-  };
+  }
 
   const tabs = [
     { name: 'meet', path: '/events' },

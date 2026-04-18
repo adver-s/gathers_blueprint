@@ -56,15 +56,34 @@ async function forward(req: NextRequest, pathSegments: string[]) {
     );
   }
 
-  const outHeaders = new Headers(upstream.headers);
-  outHeaders.delete("transfer-encoding");
-  outHeaders.delete("connection");
+  // ReadableStream をそのまま返すと Node/Next の組み合わせで 500 になることがあるため、
+  // 本文をバッファしてから返す（ログイン時の /auth/sync 等の安定化）。
+  try {
+    const buf = await upstream.arrayBuffer();
+    const outHeaders = new Headers(upstream.headers);
+    outHeaders.delete("transfer-encoding");
+    outHeaders.delete("connection");
+    outHeaders.delete("content-encoding");
+    outHeaders.delete("content-length");
+    if (buf.byteLength > 0) {
+      outHeaders.set("content-length", String(buf.byteLength));
+    }
 
-  return new NextResponse(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
-    headers: outHeaders,
-  });
+    return new NextResponse(buf.byteLength > 0 ? buf : null, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: outHeaders,
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        detail: "プロキシが応答を組み立てられませんでした",
+        upstream: upstreamBase,
+        path: pathPart,
+      },
+      { status: 502 },
+    );
+  }
 }
 
 async function segments(ctx: RouteCtx): Promise<string[]> {
