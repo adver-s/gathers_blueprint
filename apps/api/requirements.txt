@@ -14,7 +14,7 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.39.0
 sqlalchemy==2.0.38
-asyncpg==0.31.0
+psycopg[binary]
 alembic==1.13.1
 python-dotenv
 PyJWT[crypto]>=2.8.0

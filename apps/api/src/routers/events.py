@@ -10,7 +10,7 @@ from src.services import event_service as es
 router = APIRouter()
 
 
-@router.post("/", response_model=EventDetailOut)
+@router.post("", response_model=EventDetailOut)
 def create_event(
     body: EventCreate,
     db: Session = Depends(get_db),
@@ -19,7 +19,7 @@ def create_event(
     return es.create_event(db, user_id, body)
 
 
-@router.get("/", response_model=list[EventListOut])
+@router.get("", response_model=list[EventListOut])
 def list_events(
     db: Session = Depends(get_db),
     include_closed: bool = Query(False),
