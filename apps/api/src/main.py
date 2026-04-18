@@ -26,8 +26,8 @@ app = FastAPI()
 
 _cors_raw = os.getenv(
     "CORS_ORIGINS",
-    "http://127.0.0.1:3000,http://localhost:3000,"
-    "http://127.0.0.1:3004,http://localhost:3004",
+    "http://127.0.0.1:3000http://localhost:3000,"
+    "http://127.0.0.1:3004http://localhost:3004",
 )
 _cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()]
 # localhost と 127.0.0.1 は別オリジン。片方だけ .env に書くともう片方からの fetch が CORS で落ちるため補完する。
