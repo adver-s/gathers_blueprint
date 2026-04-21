@@ -34,10 +34,10 @@ def create_event(
         image_key=image_key,
         status=EventStatus.OPEN,
         owner_user_id=owner_user_id,
-        mood=mood,
-        schedule_items=schedule_items,
+        mood=mood.dict() if mood else None,
+        schedule_items=[item.dict() for item in schedule_items] if schedule_items else None,
         rule_text=rule_text,
-        restrictions=restrictions,
+        restrictions=restrictions.dict() if restrictions else None,
         location_note=location_note,
         reservation_note=reservation_note,
     )

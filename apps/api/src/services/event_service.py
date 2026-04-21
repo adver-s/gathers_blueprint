@@ -9,7 +9,10 @@ from src.schemas.event import (
     EventCreate,
     EventDetailOut,
     EventListOut,
+    EventMood,
     EventOwnerBrief,
+    EventRestrictions,
+    EventScheduleItem,
     EventStatusStr,
     EventUpdate,
     ParticipantOut,
@@ -151,10 +154,10 @@ def event_to_detail(db: Session, event: Event) -> EventDetailOut:
         image_key=event.image_key,
         owner=_owner_brief(event.owner),
         participants=participants,
-        mood=event.mood,
-        scheduleItems=event.schedule_items,
+        mood=EventMood(**event.mood) if event.mood else None,
+        scheduleItems=[EventScheduleItem(**item) for item in event.schedule_items] if event.schedule_items else None,
         ruleText=event.rule_text,
-        restrictions=event.restrictions,
+        restrictions=EventRestrictions(**event.restrictions) if event.restrictions else None,
         locationNote=event.location_note,
         reservationNote=event.reservation_note,
     )
@@ -193,13 +196,13 @@ def update_event(db: Session, event_id: int, actor_id: int, body: EventUpdate) -
     if body.image_key is not None:
         event.image_key = body.image_key
     if body.mood is not None:
-        event.mood = body.mood
+        event.mood = body.mood.dict() if body.mood else None
     if body.scheduleItems is not None:
-        event.schedule_items = body.scheduleItems
+        event.schedule_items = [item.dict() for item in body.scheduleItems] if body.scheduleItems else None
     if body.ruleText is not None:
         event.rule_text = body.ruleText
     if body.restrictions is not None:
-        event.restrictions = body.restrictions
+        event.restrictions = body.restrictions.dict() if body.restrictions else None
     if body.locationNote is not None:
         event.location_note = body.locationNote
     if body.reservationNote is not None:
